@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gender & Age AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+</head>
+
+<body>
+
+  <div class="background-globes">
+    <div class="globe globe-1"></div>
+    <div class="globe globe-2"></div>
+  </div>
+
+  <main class="app-container">
+    <!-- Left Panel: Controls -->
+    <section class="panel control-panel">
+      <header class="app-header">
+        <div class="logo">
+          <i data-lucide="scan-face"></i>
+          <span>InsightAI</span>
+        </div>
+        <h1>Gender & Age Detection</h1>
+        <p>Real-time demographic analysis powered by Deep Learning.</p>
+      </header>
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <form id="detect-form" action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="name">Subject Name</label>
+          <div class="input-wrapper">
+            <i data-lucide="user" class="input-icon"></i>
+            <input id="name" name="name" type="text" placeholder="e.g. John Doe" required />
+          </div>
+        </div>
+
+        <div class="mode-switcher">
+          <button type="button" class="mode-btn active" data-mode="upload">
+            <i data-lucide="upload-cloud"></i> Upload
+          </button>
+          <button type="button" class="mode-btn" data-mode="camera">
+            <i data-lucide="camera"></i> Live Cam
+          </button>
+        </div>
+
+        <!-- Hidden input for camera snapshots -->
+        <input type="hidden" name="camera_image" id="camera_image" />
+
+        <div id="upload-section" class="input-section">
+          <label for="image" class="drop-zone">
+            <i data-lucide="image-plus" class="drop-icon"></i>
+            <span>Click to browse or drag image here</span>
+            <input id="image" name="image" type="file" accept="image/*" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" id="submit-btn">
+            <span>Analyze Image</span>
+            <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Static Result Data Display -->
+      {% if gender or age %}
+      <div class="static-results">
+        <h3>Analysis Results</h3>
+        <div class="stat-row">
+          <div class="stat-card">
+            <span class="label">Gender</span>
+            <span class="value">{{ gender }}</span>
+          </div>
+          <div class="stat-card">
+            <span class="label">Age Group</span>
+            <span class="value">{{ age }}</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </section>
+
+    <!-- Right Panel: Visualization -->
+    <section class="panel visual-panel">
+      <div class="visual-container">
+        <!-- Live Camera View -->
+        <div id="camera-view" class="view-box hidden">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="overlay-canvas"></canvas>
+          <div class="camera-controls">
+            <button type="button" id="start-camera" class="cam-btn">
+              <i data-lucide="play"></i> Start
+            </button>
+            <button type="button" id="capture-btn" class="cam-btn capture">
+              <i data-lucide="aperture"></i> Capture
+            </button>
+          </div>
+          <div class="live-indicator hidden">
+            <span class="dot"></span> Live Inference
+          </div>
+        </div>
+
+        <!-- Static Image Preview / Result -->
+        <div id="image-view" class="view-box">
+          {% if processed_image %}
+          <img src="{{ processed_image }}" alt="Result" class="preview-img" />
+          {% else %}
+          <div class="placeholder-state">
+            <div class="placeholder-art">
+              <i data-lucide="scan-face" size="64"></i>
+            </div>
+            <p>Select an image or start camera to see results</p>
+          </div>
+          <img id="preview-img" class="preview-img hidden" alt="Preview" />
+          {% endif %}
+        </div>
+      </div>
+      <!-- Toast Notification -->
+      <div id="toast-container" class="toast-container hidden">
+        <div class="toast-content">
+          <i data-lucide="check-circle" class="toast-icon"></i>
+          <span>Snapshot captured successfully!</span>
+        </div>
+      </div>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>
